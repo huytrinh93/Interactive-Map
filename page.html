@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Leaflet Demo</title>
+<link rel="stylesheet" type="text/css" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+<style type="text/css">
+	#map-canvas {
+		height: 100%;
+		position: absolute;
+		top: 0;
+		bottom: -200px;
+		left: 0;
+		right: 0;
+		z-index: 0;
+	}
+	 
+	#container {
+		height: 35%;
+		width: 25%;
+		top:0;
+		right:0;
+		z-index: 100;
+		position: absolute;
+	} 
+	.info {
+    padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+	}
+	.info h4 {
+		margin: 0 0 5px;
+		color: #777;
+	}
+	
+	.legend {
+    line-height: 18px;
+    color: #555;
+	}
+	.legend i {
+		width: 18px;
+		height: 18px;
+		float: left;
+		margin-right: 8px;
+		opacity: 0.7;
+	}
+</style>
+<script type='text/javascript' src='http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js?2'></script>
+
+</head>
+<body>
+<div id='container'>
+<script type="text/javascript" src="dist/L.TileLayer.Zoomify.js"></script>
+<script type="text/javascript" src="dist/L.Map.Sync.js"></script>
+<script type="text/javascript">
+/*
+	var map1 = L.map('container').setView(new L.LatLng(0,0), 0);
+		L.tileLayer.zoomify('http://thematicmapping.org/playground/zoomify/books/', {
+		width: 5472,
+		height: 3648,
+		tolerance: 0.8,
+		attribution: 'MU'
+	}).addTo(map1);
+*/
+
+    //var layer1 = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+	var layer1 = L.tileLayer('https://a.tiles.mapbox.com/v4/huytrinh93.l43lh40m/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiaHV5dHJpbmg5MyIsImEiOiJMQnBYZnZ3In0.fNi6vSMBFTQ5ImFuDGvO8w#4/38.90/-92.10', {
+        attribution: '© MU'
+    });
+
+    var map1 = L.map('container', {
+        layers: [layer1],
+        center: [38.939340, -92.327878],
+        zoom: 18,
+		zoomControl: false
+    });
+	 map1.attributionControl.setPrefix('');
+
+</script>
+</div>
+ 
+<div id='map-canvas'></div>
+<script type='text/javascript'>
+
+	 var map = L.map('map-canvas').setView([38.939340, -92.327878], 8);
+	 
+//L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
+			maxZoom: 18,
+			attribution: 'MU Tigersenses',
+			//id: 'examples.map-20v6611k'
+			id: 'examples.map-i875mjb7'
+			//id: 'huytrinh93.l43lh40m'
+		}).addTo(map);
+
+
+/*
+var layer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png');
+
+var map = L.map('map-canvas', {
+        layers: [layer],
+        center: [38.939340, -92.327878],
+        zoom: 8
+    });
+*/
+    map1.sync(map);
+    map.sync(map1);
+	
+	
+var regions = [{
+    "type": "Feature",
+    "properties": {"Layer": "Soil"},
+    "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+            [-92.30,38.90],
+			[-92.30,38.40],
+			[-92.80,38.40],
+			[-92.80,38.90],
+			[-92.30,38.90]
+        ]]
+    }
+}, {
+    "type": "Feature",
+    "properties": {"Layer": "Grass"},
+    "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+            [-92.30,38.90],
+			[-92.30,39.40],
+			[-91.80,39.40],
+			[-91.80,38.90],
+			[-92.30,38.90]
+        ]]
+    }
+}, {
+	"type": "Feature",
+    "properties": {"Layer": "Metal"},
+    "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+            [-90.30,38.90],
+			[-90.60,38.60],
+			[-90.45,38.20],
+			[-90.15,38.20],
+			[-90.00,38.60],
+			[-90.30,38.90]
+        ]]
+    }
+}];
+
+L.geoJson(regions, {
+    style: function(feature) {
+        switch (feature.properties.Layer) {
+            case 'Soil': return {color: "#F5D07F"};
+            case 'Grass':   return {color: "#06F81E"};
+			case 'Metal' : return {color: "#736666"};
+        }
+    }
+}).addTo(map);
+
+function style(feature) {
+    return {
+        weight: 2,
+        opacity: 1,
+        color: 'white',
+        dashArray: '3',
+        fillOpacity: 0.7
+    };
+}
+
+function highlightFeature(e) {
+    var layer = e.target;
+
+    layer.setStyle({
+        weight: 5,
+        color: '#666',
+        dashArray: '',
+        fillOpacity: 0.7
+    });
+
+    if (!L.Browser.ie && !L.Browser.opera) {
+        layer.bringToFront();
+    }
+	info.update(layer.feature.properties);
+}
+
+function resetHighlight(e) {
+    geojson.resetStyle(e.target);
+	info.update();
+}
+
+function zoomToFeature(e) {
+    map.fitBounds(e.target.getBounds());
+}
+
+function onEachFeature(feature, layer) {
+    layer.on({
+        mouseover: highlightFeature,
+        mouseout: resetHighlight,
+        click: zoomToFeature
+    });
+}
+
+geojson = L.geoJson(regions, {
+    style: style,
+    onEachFeature: onEachFeature
+}).addTo(map);
+
+var info = L.control();
+
+info.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+    this.update();
+    return this._div;
+};
+
+// method that we will use to update the control based on feature properties passed
+info.update = function (props) {
+    this._div.innerHTML = '<h4>US Population Density</h4>' +  (props ?
+        '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
+        : 'Hover over a state');
+};
+
+info.addTo(map);
+/*
+var legend = L.control({position: 'bottomright'});
+
+legend.onAdd = function (map) {
+
+    var div = L.DomUtil.create('div', 'info legend'),
+        grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+        labels = [];
+
+    // loop through our density intervals and generate a label with a colored square for each interval
+    for (var i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+            '<i style="background:' + (grades[i] + 1) + '"></i> ' +
+            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+    }
+
+    return div;
+};
+
+legend.addTo(map);
+*/
+
+//create popup for marker
+var marker = L.marker([38.939340, -92.327878]).addTo(map).bindPopup("<img src='images/Pic1.jpg' height='200' width ='200'/>").openPopup();
+
+</script>
+</body>
+</html> 
