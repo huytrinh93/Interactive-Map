@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <title>Leaflet Sync Demo</title>
     <link rel="stylesheet" type="text/css" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
-    <!--[if lte IE 8]>
+    <script src='https://api.mapbox.com/mapbox.js/v2.2.1/mapbox.js'></script>
+	<!--[if lte IE 8]>
         <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.ie.css" />
     <![endif]-->
     <style type="text/css">
@@ -46,7 +47,7 @@
 
     map1.sync(map2);
     map2.sync(map1);
-
+L.control.scale().addTo(map1);
     </script>
 </body>
 </html>
